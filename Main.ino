@@ -1,5 +1,7 @@
 #include <LiquidCrystal.h>
 #include <Servo.h>
+#include <SPI.h>
+#include <MFRC522.h>
 
 // Déclaration des broches du module radar 1
 const int trigPin1 = 11;   // broche qui envoie l'impulsion sonore
@@ -13,14 +15,14 @@ const int echoPin2 = 46;    // Broche PWM
 const int trigPin3 = 45;    // Broche PWM
 const int echoPin3 = 44;    // Broche PWM
 
-// Radar d'entrée pour détecter un véhicule devant la barrière
-const int trigPinEntree = 12;
-const int echoPinEntree = 13;
+// Lecteur RFID MFRC522
+const int SS_PIN = 53;
+const int RST_PIN = 5;
+MFRC522 rfid(SS_PIN, RST_PIN);
 
 // Paramètres du système
 const int totalPlaces = 3;
 const float seuilPresence = 30.0; // en cm
-const float seuilVehicule = 40.0; // en cm
 
 // Broches du LCD 1602 (mode 4 bits)
 const int rs = 22;
@@ -34,10 +36,12 @@ const int d7 = 27;
 const int pinServo = 8;
 const int angleBarriereFermee = 90;
 const int angleBarriereOuverte = 180;
+const unsigned long delaiOuverture = 2500; // 2.5 s
 
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 Servo barriereServo;
 bool barriereOuverte = false;
+unsigned long dernierBadgeDetecte = 0;
 
 void setup() {
   pinMode(trigPin1, OUTPUT);
@@ -46,8 +50,9 @@ void setup() {
   pinMode(echoPin2, INPUT);
   pinMode(trigPin3, OUTPUT);
   pinMode(echoPin3, INPUT);
-  pinMode(trigPinEntree, OUTPUT);
-  pinMode(echoPinEntree, INPUT);
+
+  SPI.begin();
+  rfid.PCD_Init();
 
   barriereServo.attach(pinServo);
   fermerBarriere();
@@ -67,12 +72,10 @@ void loop() {
   float distance1 = mesurerDistance(trigPin1, echoPin1);
   float distance2 = mesurerDistance(trigPin2, echoPin2);
   float distance3 = mesurerDistance(trigPin3, echoPin3);
-  float distanceEntree = mesurerDistance(trigPinEntree, echoPinEntree);
 
   bool place1Occupee = (distance1 < seuilPresence);
   bool place2Occupee = (distance2 < seuilPresence);
   bool place3Occupee = (distance3 < seuilPresence);
-  bool vehiculeDetecte = (distanceEntree < seuilVehicule);
 
   int placesOccupees = 0;
   if (place1Occupee) placesOccupees++;
@@ -87,12 +90,10 @@ void loop() {
   Serial.print(distance2);
   Serial.print(" cm | Place3: ");
   Serial.print(distance3);
-  Serial.print(" cm | Entree: ");
-  Serial.print(distanceEntree);
   Serial.print(" cm | Libres: ");
   Serial.println(placesLibres);
 
-  gererBarriere(vehiculeDetecte);
+  gererBadgeRFID();
   afficherLCD(placesLibres, place1Occupee, place2Occupee, place3Occupee);
 
   delay(300);
@@ -111,14 +112,36 @@ float mesurerDistance(int trigPin, int echoPin) {
   return distance;
 }
 
-void gererBarriere(bool vehiculeDetecte) {
-  if (vehiculeDetecte && !barriereOuverte) {
-    ouvrirBarriere();
+void gererBadgeRFID() {
+  if (!rfid.PICC_IsNewCardPresent()) {
+    return;
   }
 
-  if (!vehiculeDetecte && barriereOuverte) {
-    fermerBarriere();
+  if (!rfid.PICC_ReadCardSerial()) {
+    return;
   }
+
+  unsigned long now = millis();
+  if (now - dernierBadgeDetecte < 2000) {
+    rfid.PICC_HaltA();
+    rfid.PCD_StopCrypto1();
+    return;
+  }
+
+  dernierBadgeDetecte = now;
+  Serial.print("Badge RFID detecte: ");
+  for (byte i = 0; i < rfid.uid.size; i++) {
+    Serial.print(rfid.uid.uidByte[i] < 0x10 ? "0" : "");
+    Serial.print(rfid.uid.uidByte[i], HEX);
+  }
+  Serial.println();
+
+  ouvrirBarriere();
+  delay(delaiOuverture);
+  fermerBarriere();
+
+  rfid.PICC_HaltA();
+  rfid.PCD_StopCrypto1();
 }
 
 void ouvrirBarriere() {
