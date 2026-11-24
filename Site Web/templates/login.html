@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SmartSpot Connexion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+</head>
+<body class="login-page">
+
+  <div class="login-container">
+
+    <!-- Logo -->
+    <div class="login-logo">
+      <div class="logo-icon">
+        <div class="p-sign">P</div>
+      </div>
+      <div class="logo-text">
+        <span class="logo-smart">Smart</span><span class="logo-spot">Spot</span>
+      </div>
+    </div>
+
+    <p class="login-slogan">Votre place, En un coup d'œil</p>
+
+    <!-- Formulaire -->
+    <form class="login-form" method="POST" action="/login">
+
+      {% if error %}
+        <div class="alert-error">{{ error }}</div>
+      {% endif %}
+
+      <div class="form-group">
+        <label for="username">Identifiant</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Entrez votre identifiant"
+          required
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Entrez votre mot de passe"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button type="submit" class="btn-login">Se connecter</button>
+
+    </form>
+
+    <p class="login-hint">
+      Accès réservé aux membres de l'équipe projet, professeurs et campus PMN.
+    </p>
+
+  </div>
+
+  <!-- Éléments décoratifs fond -->
+  <div class="bg-circle bg-circle-1"></div>
+  <div class="bg-circle bg-circle-2"></div>
+  <div class="bg-circle bg-circle-3"></div>
+
+</body>
+</html>

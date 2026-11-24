@@ -1,0 +1,708 @@
+/* ════════════════════════════════════════════════════════════
+   SmartSpot — Feuille de style principale
+   Palette : noir #000, bleu parking #1469C5, vert #22E085
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  --bg-dark:       #000000;
+  --bg-card:       #0d0d0d;
+  --bg-sidebar:    #080808;
+  --bg-hover:      #141414;
+  --border:        #1f1f1f;
+
+  --blue:          #1469C5;
+  --blue-light:    #2280e8;
+  --blue-dim:      rgba(20,105,197,0.15);
+
+  --green:         #22E085;
+  --green-dim:     rgba(34,224,133,0.15);
+
+  --red:           #E53935;
+  --red-dim:       rgba(229,57,53,0.15);
+
+  --orange:        #FF8C00;
+
+  --text-white:    #ffffff;
+  --text-muted:    #8a8a8a;
+  --text-dim:      #3a3a3a;
+
+  --radius:        12px;
+  --radius-sm:     8px;
+  --shadow:        0 4px 24px rgba(0,0,0,0.6);
+
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-white);
+  min-height: 100vh;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* ═══ PAGE LOGIN ═══════════════════════════════════════════════ */
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
+  padding: 48px 40px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  z-index: 1;
+}
+
+.login-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.logo-icon {
+  width: 56px;
+  height: 56px;
+  background: var(--blue);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.p-sign {
+  font-size: 32px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+}
+
+.logo-text {
+  font-size: 30px;
+  font-weight: 800;
+}
+.logo-smart { color: var(--text-white); }
+.logo-spot  { color: var(--green); }
+
+.login-slogan {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 36px;
+  letter-spacing: 0.3px;
+}
+
+.alert-error {
+  background: var(--red-dim);
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  color: var(--red);
+  font-size: 13px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+
+.login-form .form-group {
+  margin-bottom: 20px;
+}
+.login-form label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.login-form input {
+  width: 100%;
+  padding: 13px 16px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-white);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.login-form input:focus {
+  border-color: var(--blue);
+}
+.login-form input::placeholder {
+  color: var(--text-dim);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 14px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+.btn-login:hover  { background: var(--blue-light); }
+.btn-login:active { transform: scale(0.98); }
+
+.login-hint {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: 24px;
+  line-height: 1.5;
+}
+
+/* Cercles décoratifs fond login */
+.bg-circle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.bg-circle-1 { width:400px; height:400px; background:var(--blue-dim);  top:-100px;  right:-100px; }
+.bg-circle-2 { width:300px; height:300px; background:var(--green-dim); bottom:-80px; left:-80px;  }
+.bg-circle-3 { width:200px; height:200px; background:var(--blue-dim);  bottom:100px; right:50px;  }
+
+/* ═══ LAYOUT APP ════════════════════════════════════════════════ */
+
+.app-page {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* ─── SIDEBAR ───────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.logo-icon-sm {
+  width: 36px;
+  height: 36px;
+  background: var(--blue);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 20px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.sidebar-brand { font-size: 20px; font-weight: 800; }
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-item:hover  { background: var(--bg-hover); color: var(--text-white); }
+.nav-item.active { background: var(--blue-dim); color: var(--blue-light); }
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+.user-info { display: flex; align-items: center; gap: 10px; }
+.user-avatar {
+  width: 34px; height: 34px;
+  background: var(--blue-dim);
+  border: 1px solid var(--blue);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 14px; color: var(--blue-light);
+}
+.user-name  { font-size: 13px; font-weight: 600; }
+.user-role  { font-size: 11px; color: var(--text-muted); }
+.btn-logout {
+  width: 32px; height: 32px;
+  background: var(--bg-hover);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.btn-logout svg { width: 16px; height: 16px; }
+.btn-logout:hover { background: var(--red-dim); color: var(--red); }
+
+/* ─── MAIN CONTENT ──────────────────────────────────────────── */
+.main-content {
+  padding: 32px 36px;
+  overflow-y: auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+.page-header h1 { font-size: 26px; font-weight: 800; }
+.page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+.header-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-dim);
+  border: 1px solid var(--green);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 1px;
+}
+.live-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:0.4; transform:scale(1.4); }
+}
+
+/* ─── KPI GRID ──────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.kpi-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.kpi-icon svg { width: 22px; height: 22px; }
+.kpi-total    { background: #1a1a1a; color: var(--text-muted); }
+.kpi-libre    { background: var(--green-dim); color: var(--green); }
+.kpi-occupe   { background: var(--red-dim);   color: var(--red); }
+.kpi-passages { background: var(--blue-dim);  color: var(--blue-light); }
+
+.kpi-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.kpi-value { font-size: 28px; font-weight: 800; }
+.kpi-value.green { color: var(--green); }
+.kpi-value.red   { color: var(--red); }
+.kpi-value.blue  { color: var(--blue-light); }
+
+/* ─── SECTIONS ──────────────────────────────────────────────── */
+.parking-section,
+.historique-section,
+.reservation-section,
+.form-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.section-title svg { width: 18px; height: 18px; color: var(--blue-light); }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-refresh {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-refresh:hover { color: var(--text-white); border-color: var(--blue); }
+
+/* ─── PARKING VISUEL ────────────────────────────────────────── */
+.parking-lot {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.place-card {
+  width: 200px;
+  border-radius: 16px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  transition: all 0.3s;
+  cursor: default;
+}
+.place-card.libre   { border-color: var(--green); }
+.place-card.occupee { border-color: var(--red); }
+.place-card.reservee{ border-color: var(--orange); }
+
+.place-card-header {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.place-card.libre    .place-card-header { background: var(--green-dim); color: var(--green); }
+.place-card.occupee  .place-card-header { background: var(--red-dim);   color: var(--red); }
+.place-card.reservee .place-card-header { background: rgba(255,140,0,.15); color: var(--orange); }
+
+.place-num { font-size: 18px; font-weight: 900; }
+
+.status-dot { display: block; flex-shrink: 0; }
+
+/* Vue voiture du dessus */
+.place-visual {
+  background: #0a0a0a;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+}
+
+.car-top-view {
+  position: relative;
+  width: 70px;
+}
+.car-body {
+  width: 70px;
+  height: 110px;
+  border-radius: 14px 14px 10px 10px;
+  border: 2px solid;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.occupee .car-body  { border-color: var(--red);   background: rgba(229,57,53,0.1); }
+.libre .car-body    { border-color: #2a2a2a; background: transparent; }
+
+/* Pare-brise */
+.car-windshield {
+  position: absolute;
+  top: 14px; left: 8px; right: 8px;
+  height: 30px;
+  border-radius: 6px;
+}
+.occupee .car-windshield { background: rgba(229,57,53,0.3); }
+.libre   .car-windshield { background: #1a1a1a; }
+
+/* Roues */
+.car-wheel {
+  position: absolute;
+  width: 12px;
+  height: 20px;
+  border-radius: 4px;
+  background: #333;
+}
+.car-wheel.fl { top: 18px; left: -8px; }
+.car-wheel.fr { top: 18px; right: -8px; }
+.car-wheel.bl { bottom: 12px; left: -8px; }
+.car-wheel.br { bottom: 12px; right: -8px; }
+
+/* Espace vide pour place libre */
+.parking-empty {
+  width: 66px;
+  height: 106px;
+  border: 2px dashed #1e1e1e;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  color: #2a2a2a;
+  font-size: 22px;
+}
+
+.place-status-text {
+  text-align: center;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-top: 1px solid var(--border);
+}
+.libre   .place-status-text { color: var(--green); }
+.occupee .place-status-text { color: var(--red); }
+.reservee .place-status-text { color: var(--orange); }
+
+/* ─── TABLEAU HISTORIQUE ────────────────────────────────────── */
+.table-wrapper { overflow-x: auto; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.data-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid #111;
+  color: var(--text-white);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg-hover); }
+
+.loading-cell {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 30px !important;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-green  { background: var(--green-dim); color: var(--green); }
+.badge-red    { background: var(--red-dim);   color: var(--red); }
+.badge-orange { background: rgba(255,140,0,.15); color: var(--orange); }
+.badge-gray   { background: #1a1a1a; color: var(--text-muted); }
+
+/* ─── RÉSERVATION ───────────────────────────────────────────── */
+.places-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.place-select-card {
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+.place-select-card.libre {
+  border-color: var(--green);
+}
+.place-select-card.libre:hover {
+  background: var(--green-dim);
+  transform: translateY(-2px);
+}
+.place-select-card.occupee,
+.place-select-card.reservee {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.place-select-num {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.place-select-card.occupee .place-select-num,
+.place-select-card.reservee .place-select-num { color: var(--text-muted); }
+.place-select-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+.place-select-card.libre   .place-select-label { color: var(--green); }
+.place-select-card.occupee .place-select-label { color: var(--red); }
+.place-select-card.reservee .place-select-label { color: var(--orange); }
+
+/* Formulaire réservation */
+.resa-form { max-width: 600px; }
+.resa-place-label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.resa-place-label strong { color: var(--green); }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.form-group input[type="datetime-local"] {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-white);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  color-scheme: dark;
+}
+.form-group input:focus { border-color: var(--blue); }
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+}
+.btn-primary {
+  padding: 12px 24px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--blue-light); }
+.btn-secondary {
+  padding: 12px 24px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { color: var(--text-white); }
+
+.resa-message {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.resa-message svg { flex-shrink: 0; }
+.resa-message.success {
+  background: var(--green-dim);
+  border: 1px solid var(--green);
+  color: var(--green);
+}
+.resa-message.error {
+  background: var(--red-dim);
+  border: 1px solid var(--red);
+  color: var(--red);
+}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .app-page {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    flex: unset;
+  }
+  .sidebar-footer { display: none; }
+  .nav-item span  { display: none; }
+  .main-content { padding: 20px 16px; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .places-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .parking-lot { flex-direction: column; align-items: center; }
+}
