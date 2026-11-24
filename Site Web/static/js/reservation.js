@@ -31,6 +31,10 @@ async function chargerPlacesReservation() {
 
       if (p.statut === 'libre') {
         card.addEventListener('click', () => selectionnerPlace(p));
+      } else if (p.statut === 'reservee') {
+        card.style.cursor = 'pointer';
+        card.title = 'Cliquer pour annuler la réservation';
+        card.addEventListener('click', () => annulerReservationPlace(p));
       }
 
       grid.appendChild(card);
@@ -59,15 +63,35 @@ function selectionnerPlace(place) {
   // Scroll vers le formulaire
   formSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  // Pré-remplir les heures (maintenant + 1h)
+  // Pré-remplir les heures locales (maintenant + 1h)
   const now    = new Date();
   const later  = new Date(now.getTime() + 60 * 60 * 1000);
-  const toInput = d => d.toISOString().slice(0, 16);
+  const pad    = n => String(n).padStart(2, '0');
+  const toInput = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
   const heureDebut = document.getElementById('heure-debut');
   const heureFin   = document.getElementById('heure-fin');
   if (heureDebut) heureDebut.value = toInput(now);
   if (heureFin)   heureFin.value   = toInput(later);
+}
+
+// ─── Annuler une réservation existante ─────────────────────────
+async function annulerReservationPlace(place) {
+  if (!confirm(`Annuler la réservation de la place Nº ${place.numero} ?`)) {
+    return;
+  }
+  try {
+    const res = await fetch(`/api/annuler/${place.id}`, { method: 'POST' });
+    const data = await res.json();
+    if (res.ok) {
+      afficherMessage(`${data.message} (Place Nº ${place.numero})`, 'success');
+      chargerPlacesReservation();
+    } else {
+      afficherMessage(data.error || "Erreur lors de l'annulation.", 'error');
+    }
+  } catch (err) {
+    afficherMessage('Erreur réseau. Vérifiez votre connexion.', 'error');
+  }
 }
 
 // ─── Annuler la sélection ──────────────────────────────────────

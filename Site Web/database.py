@@ -11,7 +11,7 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # ── Table PLACE ──────────────────────────────────────────
+    #  Table PLACE 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS PLACE (
             id      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,7 +21,7 @@ def init_db():
         )
     ''')
 
-    # ── Table UTILISATEUR ─────────────────────────────────────
+    #  Table UTILISATEUR 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS UTILISATEUR (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +32,7 @@ def init_db():
         )
     ''')
 
-    # ── Table HISTORIQUE ──────────────────────────────────────
+    #  Table HISTORIQUE 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS HISTORIQUE (
             id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +43,7 @@ def init_db():
         )
     ''')
 
-    # ── Table RESERVATION ─────────────────────────────────────
+    #  Table RESERVATION 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS RESERVATION (
             id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +58,7 @@ def init_db():
         )
     ''')
 
-    # ── Données initiales ─────────────────────────────────────
+    #  Données initiales 
     # 3 places de parking
     cursor.executemany(
         'INSERT OR IGNORE INTO PLACE (numero, statut) VALUES (?, ?)',

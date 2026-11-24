@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, session
+from werkzeug.middleware.proxy_fix import ProxyFix
 import sqlite3
 import os
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'smartspot_secret_2024'
+app.secret_key = os.environ.get('SMARTSPOT_SECRET', 'smartspot_secret_2024')
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'smartspot.db')
 
@@ -13,7 +15,21 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# ─── ROUTES HTML ─────────────────────────────────────────────
+
+def liberer_reservations_expirees(db):
+    """Libère automatiquement les réservations dont l'heure de fin est dépassée."""
+    maintenant = datetime.now().strftime('%Y-%m-%dT%H:%M')
+    expirees = db.execute(
+        "SELECT id, place_id FROM RESERVATION WHERE statut='confirmee' AND heure_fin <= ?",
+        (maintenant,)
+    ).fetchall()
+    for r in expirees:
+        db.execute("UPDATE RESERVATION SET statut='terminee' WHERE id=?", (r['id'],))
+        db.execute("UPDATE PLACE SET statut='libre' WHERE id=? AND statut='reservee'", (r['place_id'],))
+    if expirees:
+        db.commit()
+
+# ROUTES HTML
 
 @app.route('/')
 def index():
@@ -59,11 +75,12 @@ def reservation():
         return redirect(url_for('login'))
     return render_template('reservation.html', username=session.get('username'))
 
-# ─── API JSON ─────────────────────────────────────────────────
+#  API JSON
 
 @app.route('/api/places')
 def api_places():
     db = get_db()
+    liberer_reservations_expirees(db)
     places = db.execute('SELECT * FROM PLACE ORDER BY id').fetchall()
     db.close()
     return jsonify([dict(p) for p in places])
@@ -93,8 +110,10 @@ def api_historique():
 @app.route('/api/stats')
 def api_stats():
     db = get_db()
+    liberer_reservations_expirees(db)
     total = db.execute('SELECT COUNT(*) as cnt FROM PLACE').fetchone()['cnt']
-    occupees = db.execute("SELECT COUNT(*) as cnt FROM PLACE WHERE statut='occupee'").fetchone()['cnt']
+    occupees = db.execute("SELECT COUNT(*) as cnt FROM PLACE WHERE statut IN ('occupee', 'reservee')").fetchone()['cnt']
+    reservees = db.execute("SELECT COUNT(*) as cnt FROM PLACE WHERE statut='reservee'").fetchone()['cnt']
     libres = total - occupees
     today = datetime.now().strftime('%Y-%m-%d')
     passages = db.execute(
@@ -105,6 +124,7 @@ def api_stats():
     return jsonify({
         'total': total,
         'occupees': occupees,
+        'reservees': reservees,
         'libres': libres,
         'passages_today': passages
     })
@@ -120,6 +140,7 @@ def api_reserver():
     if not all([place_id, heure_debut, heure_fin]):
         return jsonify({'error': 'Données manquantes'}), 400
     db = get_db()
+    liberer_reservations_expirees(db)
     place = db.execute("SELECT * FROM PLACE WHERE id=? AND statut='libre'", (place_id,)).fetchone()
     if not place:
         db.close()
@@ -133,26 +154,58 @@ def api_reserver():
     db.close()
     return jsonify({'message': 'Réservation confirmée', 'place_id': place_id})
 
+
+@app.route('/api/annuler/<int:place_id>', methods=['POST'])
+def api_annuler(place_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Non authentifié'}), 401
+    db = get_db()
+    place = db.execute("SELECT * FROM PLACE WHERE id=? AND statut='reservee'", (place_id,)).fetchone()
+    if not place:
+        db.close()
+        return jsonify({'error': 'Aucune réservation active sur cette place'}), 404
+    db.execute(
+        "UPDATE RESERVATION SET statut='annulee' WHERE place_id=? AND statut='confirmee'",
+        (place_id,)
+    )
+    db.execute("UPDATE PLACE SET statut='libre' WHERE id=?", (place_id,))
+    db.commit()
+    db.close()
+    return jsonify({'message': 'Réservation annulée', 'place_id': place_id})
+
+
 @app.route('/api/update_place', methods=['POST'])
 def api_update_place():
     """Endpoint appelé par serial_reader.py pour mettre à jour les statuts depuis Arduino"""
     data = request.get_json()
     statuts = data.get('statuts', [])  # liste: [{"id":1,"statut":"occupee"}, ...]
     db = get_db()
+    liberer_reservations_expirees(db)
     for item in statuts:
         place_id = item.get('id')
         statut = item.get('statut')
         if place_id and statut in ('libre', 'occupee'):
-            # Si la place devient occupée, on enregistre l'entrée
+            ancien = db.execute("SELECT statut FROM PLACE WHERE id=?", (place_id,)).fetchone()
+            if not ancien:
+                continue
+
             if statut == 'occupee':
-                ancien = db.execute("SELECT statut FROM PLACE WHERE id=?", (place_id,)).fetchone()
-                if ancien and ancien['statut'] == 'libre':
+                if ancien['statut'] in ('libre', 'reservee'):
                     db.execute(
                         'INSERT INTO HISTORIQUE (place_id, heure_entree) VALUES (?,?)',
                         (place_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
                     )
-            # Si la place devient libre, on enregistre la sortie
+                if ancien['statut'] == 'reservee':
+                    db.execute(
+                        "UPDATE RESERVATION SET statut='terminee' WHERE place_id=? AND statut='confirmee'",
+                        (place_id,)
+                    )
+                db.execute("UPDATE PLACE SET statut='occupee' WHERE id=?", (place_id,))
+
             elif statut == 'libre':
+                # Ne pas écraser une réservation active tant qu'aucune voiture n'est arrivée
+                if ancien['statut'] == 'reservee':
+                    continue
                 dernier = db.execute(
                     "SELECT id FROM HISTORIQUE WHERE place_id=? AND heure_sortie IS NULL ORDER BY heure_entree DESC LIMIT 1",
                     (place_id,)
@@ -162,10 +215,11 @@ def api_update_place():
                         "UPDATE HISTORIQUE SET heure_sortie=? WHERE id=?",
                         (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), dernier['id'])
                     )
-            db.execute("UPDATE PLACE SET statut=? WHERE id=?", (statut, place_id))
+                db.execute("UPDATE PLACE SET statut='libre' WHERE id=?", (place_id,))
     db.commit()
     db.close()
     return jsonify({'message': 'Statuts mis à jour'})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
