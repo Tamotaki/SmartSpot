@@ -21,7 +21,9 @@ import requests
 import serial
 import serial.tools.list_ports
 
-FLASK_BASE = 'http://localhost:5000'
+import os
+
+FLASK_BASE = os.environ.get('SMARTSPOT_URL', 'http://localhost:5000')
 FLASK_UPDATE_URL = f'{FLASK_BASE}/api/update_place'
 FLASK_PLACES_URL = f'{FLASK_BASE}/api/places'
 BAUD_RATE = 9600

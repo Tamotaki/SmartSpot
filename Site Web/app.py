@@ -75,6 +75,12 @@ def reservation():
         return redirect(url_for('login'))
     return render_template('reservation.html', username=session.get('username'))
 
+@app.route('/historique')
+def historique():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('historique.html', username=session.get('username'), role=session.get('role'))
+
 #  API JSON
 
 @app.route('/api/places')
@@ -96,16 +102,90 @@ def api_place(place_id):
 
 @app.route('/api/historique')
 def api_historique():
+    limit = request.args.get('limit', 50, type=int)
+    place_id = request.args.get('place_id', type=int)
     db = get_db()
-    historique = db.execute('''
-        SELECT h.*, p.numero as place_numero
-        FROM HISTORIQUE h
-        JOIN PLACE p ON h.place_id = p.id
-        ORDER BY h.heure_entree DESC
-        LIMIT 20
-    ''').fetchall()
+    if place_id:
+        historique = db.execute('''
+            SELECT h.*, p.numero as place_numero
+            FROM HISTORIQUE h
+            JOIN PLACE p ON h.place_id = p.id
+            WHERE h.place_id = ?
+            ORDER BY h.heure_entree DESC
+            LIMIT ?
+        ''', (place_id, limit)).fetchall()
+    else:
+        historique = db.execute('''
+            SELECT h.*, p.numero as place_numero
+            FROM HISTORIQUE h
+            JOIN PLACE p ON h.place_id = p.id
+            ORDER BY h.heure_entree DESC
+            LIMIT ?
+        ''', (limit,)).fetchall()
     db.close()
     return jsonify([dict(h) for h in historique])
+
+
+@app.route('/api/historique/stats')
+def api_historique_stats():
+    db = get_db()
+    rows = db.execute('''
+        SELECT h.place_id, p.numero as place_numero, h.heure_entree, h.heure_sortie
+        FROM HISTORIQUE h
+        JOIN PLACE p ON h.place_id = p.id
+    ''').fetchall()
+    db.close()
+
+    par_heure = [0] * 24
+    durees_min = []
+    stats_places = {1: {'numero': 1, 'passages': 0, 'durees': []},
+                    2: {'numero': 2, 'passages': 0, 'durees': []},
+                    3: {'numero': 3, 'passages': 0, 'durees': []}}
+
+    for r in rows:
+        entree_str = r['heure_entree']
+        sortie_str = r['heure_sortie']
+        pid = r['place_id']
+        if pid in stats_places:
+            stats_places[pid]['passages'] += 1
+
+        try:
+            dt_in = datetime.strptime(entree_str[:19], '%Y-%m-%d %H:%M:%S')
+            par_heure[dt_in.hour] += 1
+            if sortie_str:
+                dt_out = datetime.strptime(sortie_str[:19], '%Y-%m-%d %H:%M:%S')
+                diff_min = max(0, round((dt_out - dt_in).total_seconds() / 60))
+                durees_min.append(diff_min)
+                if pid in stats_places:
+                    stats_places[pid]['durees'].append(diff_min)
+        except ValueError:
+            pass
+
+    total_passages = len(rows)
+    duree_totale_min = sum(durees_min)
+    duree_moyenne_min = round(duree_totale_min / len(durees_min)) if durees_min else 0
+    max_h = max(par_heure)
+    heure_pointe = par_heure.index(max_h) if max_h > 0 else None
+
+    par_place = []
+    for pid in sorted(stats_places.keys()):
+        d = stats_places[pid]['durees']
+        par_place.append({
+            'place_id': pid,
+            'numero': stats_places[pid]['numero'],
+            'passages': stats_places[pid]['passages'],
+            'duree_moyenne_min': round(sum(d) / len(d)) if d else 0,
+            'duree_totale_min': sum(d)
+        })
+
+    return jsonify({
+        'total_passages': total_passages,
+        'duree_moyenne_min': duree_moyenne_min,
+        'duree_totale_min': duree_totale_min,
+        'heure_pointe': heure_pointe,
+        'par_heure': par_heure,
+        'par_place': par_place
+    })
 
 @app.route('/api/stats')
 def api_stats():
@@ -222,4 +302,5 @@ def api_update_place():
 
 if __name__ == '__main__':
     debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
-    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)

@@ -1,9 +1,7 @@
-/* ════════════════════════════════════════════════════════════
-   SmartSpot — app.js
-   Mise à jour automatique toutes les 2 secondes
-   ════════════════════════════════════════════════════════════ */
+/* SmartSpot — app.js
+   Mise à jour automatique toutes les 2 secondes */
 
-// ─── Mise à jour de l'heure ────────────────────────────────────
+// Mise à jour de l'heure
 function majHeure() {
   const el = document.getElementById('last-update');
   if (el) {
@@ -12,7 +10,7 @@ function majHeure() {
   }
 }
 
-// ─── Chargement des places (statuts + cartes parking) ──────────
+// Chargement des places (statuts + cartes parking)
 async function chargerPlaces() {
   try {
     const res  = await fetch('/api/places');
@@ -75,7 +73,7 @@ function rendreParkingLot(places) {
   });
 }
 
-// ─── Chargement des statistiques ───────────────────────────────
+// Chargement des statistiques 
 async function chargerStats() {
   try {
     const res  = await fetch('/api/stats');
@@ -96,7 +94,7 @@ async function chargerStats() {
   }
 }
 
-// ─── Chargement de l'historique ────────────────────────────────
+// Chargement de l'historique 
 async function chargerHistorique() {
   const tbody = document.getElementById('historique-body');
   if (!tbody) return;
@@ -139,7 +137,7 @@ async function chargerHistorique() {
   }
 }
 
-// ─── Utilitaires date ──────────────────────────────────────────
+// Utilitaires date 
 function formatDate(dateStr) {
   if (!dateStr) return '';
   try {
@@ -162,7 +160,7 @@ function calculerDuree(debut, fin) {
   } catch { return ''; }
 }
 
-// ─── Boucle principale ─────────────────────────────────────────
+// Boucle principale 
 function demarrerMiseAJour() {
   chargerPlaces();
   chargerStats();
@@ -180,5 +178,5 @@ function demarrerMiseAJour() {
   }, 15000);
 }
 
-// ─── Démarrage ─────────────────────────────────────────────────
+// Démarrage
 document.addEventListener('DOMContentLoaded', demarrerMiseAJour);

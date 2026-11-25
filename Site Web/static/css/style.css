@@ -1,7 +1,5 @@
-/* ════════════════════════════════════════════════════════════
-   SmartSpot — Feuille de style principale
-   Palette : noir #000, bleu parking #1469C5, vert #22E085
-   ════════════════════════════════════════════════════════════ */
+/* SmartSpot — Feuille de style principale
+   Palette : noir #000, bleu parking #1469C5, vert #22E085 */
 
 :root {
   --bg-dark:       #000000;
@@ -43,7 +41,7 @@ body {
 
 a { text-decoration: none; color: inherit; }
 
-/* ═══ PAGE LOGIN ═══════════════════════════════════════════════ */
+/* PAGE LOGIN */
 
 .login-page {
   display: flex;
@@ -177,7 +175,7 @@ a { text-decoration: none; color: inherit; }
 .bg-circle-2 { width:300px; height:300px; background:var(--green-dim); bottom:-80px; left:-80px;  }
 .bg-circle-3 { width:200px; height:200px; background:var(--blue-dim);  bottom:100px; right:50px;  }
 
-/* ═══ LAYOUT APP ════════════════════════════════════════════════ */
+/* LAYOUT APP  */
 
 .app-page {
   display: grid;
@@ -185,7 +183,7 @@ a { text-decoration: none; color: inherit; }
   min-height: 100vh;
 }
 
-/* ─── SIDEBAR ───────────────────────────────────────────────── */
+/* SIDEBAR */
 .sidebar {
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border);
@@ -272,7 +270,7 @@ a { text-decoration: none; color: inherit; }
 .btn-logout svg { width: 16px; height: 16px; }
 .btn-logout:hover { background: var(--red-dim); color: var(--red); }
 
-/* ─── MAIN CONTENT ──────────────────────────────────────────── */
+/* MAIN CONTENT */
 .main-content {
   padding: 32px 36px;
   overflow-y: auto;
@@ -311,7 +309,7 @@ a { text-decoration: none; color: inherit; }
   50%      { opacity:0.4; transform:scale(1.4); }
 }
 
-/* ─── KPI GRID ──────────────────────────────────────────────── */
+/* KPI GRID */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -345,7 +343,7 @@ a { text-decoration: none; color: inherit; }
 .kpi-value.red   { color: var(--red); }
 .kpi-value.blue  { color: var(--blue-light); }
 
-/* ─── SECTIONS ──────────────────────────────────────────────── */
+/* SECTIONS */
 .parking-section,
 .historique-section,
 .reservation-section,
@@ -385,7 +383,7 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-refresh:hover { color: var(--text-white); border-color: var(--blue); }
 
-/* ─── PARKING VISUEL ────────────────────────────────────────── */
+/* PARKING VISUEL */
 .parking-lot {
   display: flex;
   gap: 20px;
@@ -496,7 +494,7 @@ a { text-decoration: none; color: inherit; }
 .occupee .place-status-text { color: var(--red); }
 .reservee .place-status-text { color: var(--orange); }
 
-/* ─── TABLEAU HISTORIQUE ────────────────────────────────────── */
+/* TABLEAU HISTORIQUE */
 .table-wrapper { overflow-x: auto; }
 
 .data-table {
@@ -541,7 +539,7 @@ a { text-decoration: none; color: inherit; }
 .badge-orange { background: rgba(255,140,0,.15); color: var(--orange); }
 .badge-gray   { background: #1a1a1a; color: var(--text-muted); }
 
-/* ─── RÉSERVATION ───────────────────────────────────────────── */
+/* RÉSERVATION */
 .places-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -676,7 +674,7 @@ a { text-decoration: none; color: inherit; }
   color: var(--red);
 }
 
-/* ─── RESPONSIVE ────────────────────────────────────────────── */
+/* RESPONSIVE */
 @media (max-width: 1024px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -705,4 +703,124 @@ a { text-decoration: none; color: inherit; }
   .places-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
   .parking-lot { flex-direction: column; align-items: center; }
+}
+
+
+/* PAGE HISTORIQUE & STATISTIQUES */
+
+.hourly-chart {
+  display: grid;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: 6px;
+  align-items: end;
+  padding: 18px 14px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  height: 220px;
+}
+
+.hourly-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.hourly-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  min-height: 12px;
+}
+
+.hourly-track {
+  width: 100%;
+  flex: 1;
+  background: #141414;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.hourly-fill {
+  width: 100%;
+  background: var(--border);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.3s ease;
+}
+
+.hourly-fill.has-data {
+  background: linear-gradient(180deg, var(--green) 0%, var(--blue) 100%);
+}
+
+.hourly-label {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.place-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.place-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.place-stat-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-white);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+.place-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.place-stat-row strong { color: var(--text-white); }
+.place-stat-row strong.green { color: var(--green); }
+.place-stat-row strong.blue { color: var(--blue-light); }
+
+.filter-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-pill:hover {
+  color: var(--text-white);
+  border-color: var(--blue);
+}
+
+.filter-pill.active {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
 }
