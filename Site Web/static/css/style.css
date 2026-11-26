@@ -79,6 +79,7 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 .p-sign {
   font-size: 32px;
@@ -87,6 +88,11 @@ a { text-decoration: none; color: inherit; }
   line-height: 1;
 }
 
+.logo-text-col {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
 .logo-text {
   font-size: 30px;
   font-weight: 800;
@@ -99,6 +105,37 @@ a { text-decoration: none; color: inherit; }
   font-size: 13px;
   margin-bottom: 36px;
   letter-spacing: 0.3px;
+}
+
+.login-dashes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.sidebar-dashes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.login-dash {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.25s ease;
+}
+.sidebar-dash {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background 0.25s ease;
+}
+.login-dash.active,
+.sidebar-dash.active {
+  background: var(--green);
 }
 
 .alert-error {
@@ -175,6 +212,41 @@ a { text-decoration: none; color: inherit; }
 .bg-circle-2 { width:300px; height:300px; background:var(--green-dim); bottom:-80px; left:-80px;  }
 .bg-circle-3 { width:200px; height:200px; background:var(--blue-dim);  bottom:100px; right:50px;  }
 
+/* Point animé du logo (badge "live") */
+.logo-ping {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+}
+.logo-icon-sm .logo-ping {
+  width: 10px;
+  height: 10px;
+  top: -3px;
+  right: -3px;
+}
+.logo-ping::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--green);
+  animation: logo-ping-ring 1.8s cubic-bezier(0,0,0.2,1) infinite;
+}
+.logo-ping-core {
+  position: absolute;
+  inset: 0;
+  background: var(--green);
+  border: 2px solid var(--bg-dark);
+  border-radius: 50%;
+}
+.logo-icon-sm .logo-ping-core { border-color: var(--bg-sidebar); }
+@keyframes logo-ping-ring {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
 /* LAYOUT APP  */
 
 .app-page {
@@ -200,9 +272,14 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 8px 28px;
+  padding: 0 8px 20px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 20px;
+}
+.sidebar-brand-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .logo-icon-sm {
   width: 36px;
@@ -216,6 +293,7 @@ a { text-decoration: none; color: inherit; }
   font-size: 20px;
   color: #fff;
   flex-shrink: 0;
+  position: relative;
 }
 .sidebar-brand { font-size: 20px; font-weight: 800; }
 
@@ -278,67 +356,146 @@ a { text-decoration: none; color: inherit; }
 
 .page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: space-between;
-  margin-bottom: 32px;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
 }
-.page-header h1 { font-size: 26px; font-weight: 800; }
-.page-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.page-header-left { display: flex; flex-direction: column; gap: 10px; }
+.page-header h1 { font-size: 30px; font-weight: 800; }
+.page-subtitle { font-size: 13px; color: var(--text-muted); }
 
-.header-badge {
+/* Dashboard : horloge à gauche, KPI à droite */
+.header-right {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* HORLOGE GÉANTE — remplace le titre de page sur le dashboard */
+.clock-widget {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: var(--green-dim);
-  border: 1px solid var(--green);
+  gap: 20px;
+  background: linear-gradient(145deg, rgba(34,224,133,0.14), rgba(34,224,133,0.05));
+  border: 1px solid var(--border);
   border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--green);
+  padding: 16px 28px;
+  box-shadow: var(--shadow);
+}
+.clock-face { width: 96px; height: 96px; flex-shrink: 0; }
+.clock-ring {
+  fill: #050505;
+  stroke: var(--green);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 10px rgba(34,224,133,0.35));
+}
+.clock-tick { stroke: #2a2a2a; stroke-width: 2; }
+.clock-tick.major { stroke: var(--green); stroke-width: 3.5; }
+.clock-hand {
+  stroke-linecap: round;
+  transform-origin: 100px 100px;
+  transition: transform 0.25s cubic-bezier(.4,2,.6,1);
+}
+.hand-hour { stroke: #ffffff; stroke-width: 6; }
+.hand-min  { stroke: #ffffff; stroke-width: 4; }
+.hand-sec  { stroke: var(--green); stroke-width: 2; }
+.clock-center { fill: var(--green); stroke: var(--bg-dark); stroke-width: 2; }
+
+.clock-digital { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.clock-time {
+  font-size: 30px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
   letter-spacing: 1px;
+  background: linear-gradient(90deg, #fff, var(--green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
-.live-dot {
-  width: 8px; height: 8px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: pulse 1.4s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { opacity:1; transform:scale(1); }
-  50%      { opacity:0.4; transform:scale(1.4); }
+.clock-date {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+  margin-top: 2px;
 }
 
-/* KPI GRID */
+/* KPI GRID — intégrée au header, en 2x2 à côté de l'horloge */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 12px;
+  width: 100%;
+  flex: 1;
 }
 .kpi-card {
+  position: relative;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 20px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease;
 }
-.kpi-icon {
-  width: 48px; height: 48px;
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+.kpi-card:hover { transform: translateY(-3px); }
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  filter: blur(30px);
+  opacity: 0.5;
+  pointer-events: none;
 }
-.kpi-icon svg { width: 22px; height: 22px; }
-.kpi-total    { background: #1a1a1a; color: var(--text-muted); }
-.kpi-libre    { background: var(--green-dim); color: var(--green); }
-.kpi-occupe   { background: var(--red-dim);   color: var(--red); }
-.kpi-passages { background: var(--blue-dim);  color: var(--blue-light); }
+.kpi-total::before    { background: var(--blue); }
+.kpi-libre::before    { background: var(--green); }
+.kpi-occupe::before   { background: var(--red); }
+.kpi-passages::before { background: var(--blue-light); }
+.kpi-total:hover    { border-color: var(--blue); }
+.kpi-libre:hover    { border-color: var(--green); }
+.kpi-occupe:hover   { border-color: var(--red); }
+.kpi-passages:hover { border-color: var(--blue-light); }
 
-.kpi-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-.kpi-value { font-size: 28px; font-weight: 800; }
+/* Anneau de progression derrière l'icône */
+.kpi-ring { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+.kpi-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.kpi-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 5; }
+.kpi-ring-fill {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 169.6;
+  stroke-dashoffset: 169.6;
+  transition: stroke-dashoffset 0.8s ease;
+}
+.ring-blue       { stroke: var(--blue); }
+.ring-blue-light { stroke: var(--blue-light); }
+.ring-green      { stroke: var(--green); }
+.ring-red        { stroke: var(--red); }
+
+.kpi-icon-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.kpi-icon-wrap svg { width: 16px; height: 16px; }
+.kpi-total    .kpi-icon-wrap { color: var(--blue-light); }
+.kpi-libre    .kpi-icon-wrap { color: var(--green); }
+.kpi-occupe   .kpi-icon-wrap { color: var(--red); }
+.kpi-passages .kpi-icon-wrap { color: var(--blue-light); }
+
+.kpi-text { position: relative; z-index: 1; }
+.kpi-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; white-space: nowrap; }
+.kpi-value { font-size: 22px; font-weight: 800; line-height: 1; }
 .kpi-value.green { color: var(--green); }
 .kpi-value.red   { color: var(--red); }
 .kpi-value.blue  { color: var(--blue-light); }
@@ -385,114 +542,122 @@ a { text-decoration: none; color: inherit; }
 
 /* PARKING VISUEL */
 .parking-lot {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: 20px;
-  justify-content: center;
-  padding: 20px 0;
-  flex-wrap: wrap;
+  padding: 4px 0;
 }
 
 .place-card {
-  width: 200px;
-  border-radius: 16px;
-  border: 2px solid var(--border);
+  border-radius: 20px;
+  border: 1px solid var(--border);
   overflow: hidden;
-  transition: all 0.3s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   cursor: default;
 }
-.place-card.libre   { border-color: var(--green); }
-.place-card.occupee { border-color: var(--red); }
-.place-card.reservee{ border-color: var(--orange); }
+.place-card:hover { transform: translateY(-4px); }
+.place-card.libre    { box-shadow: 0 0 0 1px rgba(34,224,133,0.15); }
+.place-card.occupee  { box-shadow: 0 0 0 1px rgba(229,57,53,0.2); }
+.place-card.reservee { box-shadow: 0 0 0 1px rgba(255,140,0,0.25); }
 
-.place-card-header {
-  padding: 12px 16px;
-  font-size: 13px;
-  font-weight: 700;
+.place-card-top {
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: var(--bg-card);
 }
-.place-card.libre    .place-card-header { background: var(--green-dim); color: var(--green); }
-.place-card.occupee  .place-card-header { background: var(--red-dim);   color: var(--red); }
-.place-card.reservee .place-card-header { background: rgba(255,140,0,.15); color: var(--orange); }
+.place-card-num { font-size: 15px; font-weight: 800; }
 
-.place-num { font-size: 18px; font-weight: 900; }
+.place-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.place-pill.libre    { background: var(--green-dim); color: var(--green); }
+.place-pill.occupee  { background: var(--red-dim);   color: var(--red); }
+.place-pill.reservee { background: rgba(255,140,0,.15); color: var(--orange); }
 
 .status-dot { display: block; flex-shrink: 0; }
 
 /* Vue voiture du dessus */
 .place-visual {
-  background: #0a0a0a;
-  padding: 20px;
+  position: relative;
+  padding: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
+  min-height: 190px;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.025) 0 10px, transparent 10px 20px),
+    #070707;
+}
+.place-card.occupee .place-visual {
+  background:
+    repeating-linear-gradient(135deg, rgba(229,57,53,0.07) 0 10px, transparent 10px 20px),
+    radial-gradient(circle at 50% 35%, rgba(229,57,53,0.16), #070707 70%);
+}
+.place-card.reservee .place-visual {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,140,0,0.08) 0 10px, transparent 10px 20px),
+    radial-gradient(circle at 50% 35%, rgba(255,140,0,0.16), #070707 70%);
 }
 
-.car-top-view {
-  position: relative;
-  width: 70px;
+.car-icon {
+  width: 100%;
+  height: 170px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6));
 }
-.car-body {
-  width: 70px;
-  height: 110px;
-  border-radius: 14px 14px 10px 10px;
-  border: 2px solid;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Place réservée : la photo (rouge) est teintée en orange */
+.place-card.reservee .car-icon {
+  filter: hue-rotate(-40deg) saturate(1.3) drop-shadow(0 8px 18px rgba(0,0,0,0.6));
 }
-.occupee .car-body  { border-color: var(--red);   background: rgba(229,57,53,0.1); }
-.libre .car-body    { border-color: #2a2a2a; background: transparent; }
-
-/* Pare-brise */
-.car-windshield {
-  position: absolute;
-  top: 14px; left: 8px; right: 8px;
-  height: 30px;
-  border-radius: 6px;
-}
-.occupee .car-windshield { background: rgba(229,57,53,0.3); }
-.libre   .car-windshield { background: #1a1a1a; }
-
-/* Roues */
-.car-wheel {
-  position: absolute;
-  width: 12px;
-  height: 20px;
-  border-radius: 4px;
-  background: #333;
-}
-.car-wheel.fl { top: 18px; left: -8px; }
-.car-wheel.fr { top: 18px; right: -8px; }
-.car-wheel.bl { bottom: 12px; left: -8px; }
-.car-wheel.br { bottom: 12px; right: -8px; }
 
 /* Espace vide pour place libre */
 .parking-empty {
-  width: 66px;
-  height: 106px;
-  border: 2px dashed #1e1e1e;
-  border-radius: 12px;
+  width: 100%;
+  height: 160px;
+  border: 2px dashed #202020;
+  border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
+}
+.parking-empty span {
   color: #2a2a2a;
-  font-size: 22px;
+  font-size: 44px;
+  font-weight: 900;
 }
 
-.place-status-text {
-  text-align: center;
-  padding: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+/* Détails sous la voiture (statut + infos réservation) */
+.place-resa-details {
+  padding: 12px 16px 16px;
+  background: var(--bg-card);
   border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.libre   .place-status-text { color: var(--green); }
-.occupee .place-status-text { color: var(--red); }
-.reservee .place-status-text { color: var(--orange); }
+.place-resa-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-white);
+}
+.place-card.libre   .place-resa-row { color: var(--green); }
+.place-card.occupee .place-resa-row { color: var(--red); }
+.place-card.reservee .place-resa-row { color: var(--orange); }
+.place-resa-user {
+  font-size: 11.5px;
+  color: var(--text-muted);
+}
 
 /* TABLEAU HISTORIQUE */
 .table-wrapper { overflow-x: auto; }
@@ -702,7 +867,10 @@ a { text-decoration: none; color: inherit; }
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .places-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
-  .parking-lot { flex-direction: column; align-items: center; }
+  .parking-lot { grid-template-columns: 1fr; }
+  .clock-widget { padding: 14px 20px; gap: 16px; }
+  .clock-face { width: 90px; height: 90px; }
+  .clock-time { font-size: 34px; }
 }
 
 

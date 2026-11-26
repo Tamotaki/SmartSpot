@@ -7,6 +7,10 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = os.environ.get('SMARTSPOT_SECRET', 'smartspot_secret_2024')
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+# Recharge les templates HTML à chaque requête (sinon Flask les met en cache quand Debug est désactivé)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+# Désactive la mise en cache des fichiers statiques (CSS/JS) par le navigateur
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'smartspot.db')
 
@@ -87,7 +91,16 @@ def historique():
 def api_places():
     db = get_db()
     liberer_reservations_expirees(db)
-    places = db.execute('SELECT * FROM PLACE ORDER BY id').fetchall()
+    places = db.execute('''
+        SELECT PLACE.*,
+               RESERVATION.heure_debut AS resa_debut,
+               RESERVATION.heure_fin   AS resa_fin,
+               UTILISATEUR.username    AS resa_user
+        FROM PLACE
+        LEFT JOIN RESERVATION ON RESERVATION.place_id = PLACE.id AND RESERVATION.statut = 'confirmee'
+        LEFT JOIN UTILISATEUR ON UTILISATEUR.id = RESERVATION.utilisateur_id
+        ORDER BY PLACE.id
+    ''').fetchall()
     db.close()
     return jsonify([dict(p) for p in places])
 

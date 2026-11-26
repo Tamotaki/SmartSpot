@@ -1,12 +1,54 @@
 /* SmartSpot — app.js
    Mise à jour automatique toutes les 2 secondes */
 
-// Mise à jour de l'heure
-function majHeure() {
-  const el = document.getElementById('last-update');
-  if (el) {
-    const now = new Date();
-    el.textContent = now.toLocaleTimeString('fr-FR');
+// ─── Horloge géante (analogique + numérique) ────────────────────
+function initHorloge() {
+  const ticks = document.getElementById('clock-ticks');
+  if (!ticks || ticks.childElementCount) return; // déjà généré
+
+  for (let i = 0; i < 60; i++) {
+    const angle   = i * 6; // 360/60
+    const majeur  = i % 5 === 0;
+    const r1      = majeur ? 78 : 86;
+    const r2      = 92;
+    const rad     = (angle - 90) * Math.PI / 180;
+    const x1 = 100 + r1 * Math.cos(rad);
+    const y1 = 100 + r1 * Math.sin(rad);
+    const x2 = 100 + r2 * Math.cos(rad);
+    const y2 = 100 + r2 * Math.sin(rad);
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1.toFixed(2));
+    line.setAttribute('y1', y1.toFixed(2));
+    line.setAttribute('x2', x2.toFixed(2));
+    line.setAttribute('y2', y2.toFixed(2));
+    line.setAttribute('class', majeur ? 'clock-tick major' : 'clock-tick');
+    ticks.appendChild(line);
+  }
+}
+
+function majHorloge() {
+  const now = new Date();
+
+  const h = now.getHours();
+  const m = now.getMinutes();
+  const s = now.getSeconds();
+
+  const handHour = document.getElementById('hand-hour');
+  const handMin  = document.getElementById('hand-min');
+  const handSec  = document.getElementById('hand-sec');
+
+  if (handHour) handHour.style.transform = `rotate(${(h % 12) * 30 + m * 0.5}deg)`;
+  if (handMin)  handMin.style.transform  = `rotate(${m * 6 + s * 0.1}deg)`;
+  if (handSec)  handSec.style.transform  = `rotate(${s * 6}deg)`;
+
+  const timeEl = document.getElementById('clock-time');
+  const dateEl = document.getElementById('clock-date');
+  if (timeEl) timeEl.textContent = now.toLocaleTimeString('fr-FR');
+  if (dateEl) {
+    dateEl.textContent = now.toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    });
   }
 }
 
@@ -17,11 +59,25 @@ async function chargerPlaces() {
     const data = await res.json();
 
     rendreParkingLot(data);
-    majHeure();
   } catch (err) {
     console.warn('Erreur places :', err);
   }
 }
+
+// Photo voiture vue du dessus (se recolore en CSS selon le statut)
+function iconeVoiture() {
+  return `<img class="car-icon" src="/static/img/voiture-vue-dessus.png" alt="Voiture">`;
+}
+
+function heureCourte(dateStr) {
+  if (!dateStr) return '';
+  try {
+    return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  } catch { return ''; }
+}
+
+const ICONE_CADENAS = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const ICONE_HORLOGE  = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
 function rendreParkingLot(places) {
   const lot = document.getElementById('parking-lot');
@@ -33,47 +89,62 @@ function rendreParkingLot(places) {
     const card = document.createElement('div');
     card.className = `place-card ${statut}`;
 
-    // Icône statut
-    const dot = '<svg class="status-dot" width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>';
+    const dot = '<svg class="status-dot" width="8" height="8" viewBox="0 0 10 10" fill="currentColor"><circle cx="5" cy="5" r="5"/></svg>';
     const labels = {
-      libre:    'Libre',
+      libre:    'Disponible',
       occupee:  'Occupée',
       reservee: 'Réservée'
     };
 
-    // Voiture vue du dessus si occupée, sinon espace vide
+    // Voiture vue du dessus si occupée/réservée, sinon emplacement vide rayé
     let visualHTML;
-    if (statut === 'occupee') {
-      visualHTML = `
-        <div class="car-top-view ${statut}">
-          <div class="car-body">
-            <div class="car-windshield"></div>
-            <div class="car-wheel fl"></div>
-            <div class="car-wheel fr"></div>
-            <div class="car-wheel bl"></div>
-            <div class="car-wheel br"></div>
-          </div>
-        </div>`;
+    if (statut === 'occupee' || statut === 'reservee') {
+      visualHTML = iconeVoiture();
     } else {
-      visualHTML = `<div class="parking-empty">P</div>`;
+      visualHTML = `<div class="parking-empty"><span>P</span></div>`;
+    }
+
+    // Détails de réservation (si une réservation active existe)
+    let footerHTML;
+    if (statut === 'reservee' && p.resa_debut) {
+      footerHTML = `
+        <div class="place-resa-details">
+          <span class="place-resa-row">${ICONE_HORLOGE} ${heureCourte(p.resa_debut)} → ${heureCourte(p.resa_fin)}</span>
+          ${p.resa_user ? `<span class="place-resa-user">réservée par ${p.resa_user}</span>` : ''}
+        </div>`;
+    } else if (statut === 'occupee') {
+      footerHTML = `<div class="place-resa-details"><span class="place-resa-row">Véhicule stationné</span></div>`;
+    } else {
+      footerHTML = `<div class="place-resa-details"><span class="place-resa-row">Prête à l'emploi</span></div>`;
     }
 
     card.innerHTML = `
-      <div class="place-card-header">
-        <span>Place ${p.numero}</span>
-        <span>${dot}</span>
+      <div class="place-card-top">
+        <span class="place-card-num">Place ${p.numero}</span>
+        <span class="place-pill ${statut}">${statut === 'reservee' ? ICONE_CADENAS : dot} ${labels[statut]}</span>
       </div>
       <div class="place-visual">
         ${visualHTML}
       </div>
-      <div class="place-status-text">${labels[statut]}</div>
+      ${footerHTML}
     `;
 
     lot.appendChild(card);
   });
 }
 
-// Chargement des statistiques 
+// Anneau de progression des cartes KPI
+const RING_CIRCONFERENCE = 2 * Math.PI * 27;
+
+function majAnneau(id, pct) {
+  const ring = document.getElementById(id);
+  if (!ring) return;
+  const offset = RING_CIRCONFERENCE * (1 - Math.min(Math.max(pct, 0), 100) / 100);
+  ring.style.strokeDasharray  = RING_CIRCONFERENCE;
+  ring.style.strokeDashoffset = offset;
+}
+
+// Chargement des statistiques
 async function chargerStats() {
   try {
     const res  = await fetch('/api/stats');
@@ -88,6 +159,12 @@ async function chargerStats() {
     setEl('stat-libres',   data.libres);
     setEl('stat-occupees', data.occupees);
     setEl('stat-passages', data.passages_today);
+
+    const total = data.total || 1;
+    majAnneau('ring-total',    100);
+    majAnneau('ring-libres',   (data.libres   / total) * 100);
+    majAnneau('ring-occupees', (data.occupees / total) * 100);
+    majAnneau('ring-passages', Math.min((data.passages_today / (total * 4)) * 100, 100));
 
   } catch (err) {
     console.warn('Erreur stats :', err);
@@ -160,8 +237,12 @@ function calculerDuree(debut, fin) {
   } catch { return ''; }
 }
 
-// Boucle principale 
+// Boucle principale
 function demarrerMiseAJour() {
+  initHorloge();
+  majHorloge();
+  setInterval(majHorloge, 1000);
+
   chargerPlaces();
   chargerStats();
   chargerHistorique();
